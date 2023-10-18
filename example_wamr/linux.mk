@@ -1,4 +1,5 @@
 PROGNAME = test_wamr_$(VARIANT)
+PROGBIN = $(DIST_DIR)/$(PROGNAME)
 
 # Source compilation flags
 include $(BUILDROOT)/flags.mk
@@ -22,18 +23,18 @@ OBJS = $(addprefix $(OUTPUT_DIR)/, $(CSRCS:%.c=%.o))
 DEPS += $(OUTPUT_DIR)
 
 # build rules
-$(OUTPUT_DIR)/$(PROGNAME): $(OBJS)
+$(PROGBIN): $(OBJS) $(DEPS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJS) $(LIBS)
 	@echo Successfully built $(subst $(BUILDROOT)/,, $@)
 
-compile: $(OUTPUT_DIR)/$(PROGNAME) ## compile
+compile: $(PROGBIN) ## compile
 .PHONY: compile
 
-strip: $(OUTPUT_DIR)/$(PROGNAME) ## discard symbols from binary
+strip: $(PROGBIN) ## discard symbols from binary
 	@strip -s $<
 .PHONY: strip
 
-size: $(OUTPUT_DIR)/$(PROGNAME) ## display binary size
+size: $(PROGBIN) ## display binary size
 	@size $<
 	@ls -sh $<
 .PHONY: size

@@ -3,9 +3,10 @@ LIB_CFLAGS ?=
 BUILDROOT ?= $(CURDIR)
 DEPEND_DIR ?= $(BUILDROOT)/depend
 OUTPUT_DIR ?= $(BUILDROOT)/build
+TOOLS_DIR ?= $(BUILDROOT)/../tools
 DEPEND_PARALLEL_JOBS ?= 1
 
-GIT_CHECKOUT = $(BUILDROOT)/tools/git_checkout.sh
+GIT_CHECKOUT = $(TOOLS_DIR)/git_checkout.sh
 CMAKE = cmake
 
 include $(BUILDROOT)/libs.mk
@@ -18,11 +19,11 @@ CFLAGS += -pthread
 LIB_WAMR = $(OUTPUT_DIR)/wasm-micro-runtime/libvmlib.a
 LIB_WAMR_SRC = $(DEPEND_DIR)/wasm-micro-runtime
 
-  LIBS += -lvmlib -lm
-  LIBS += -L$(OUTPUT_DIR)/wasm-micro-runtime
-  CFLAGS += -I$(LIB_WAMR_SRC)/core/iwasm/include
-  DEPS += wasm-micro-runtime
-  PREPS += $(LIB_WAMR_SRC)
+LIBS += -lvmlib -lm
+LIBS += -L$(OUTPUT_DIR)/wasm-micro-runtime
+CFLAGS += -I$(LIB_WAMR_SRC)/core/iwasm/include
+DEPS += wasm-micro-runtime
+PREPS += $(LIB_WAMR_SRC)
 
 $(LIB_WAMR_SRC):
 	$(GIT_CHECKOUT) $(LIB_WAMR_GIT_URL) $(LIB_WAMR_GIT_TAG) $@
@@ -30,7 +31,7 @@ $(LIB_WAMR): $(LIB_WAMR_SRC)
 	mkdir -p $(OUTPUT_DIR)/wasm-micro-runtime
 	CFLAGS="$(LIB_CFLAGS)" $(CMAKE) \
 		-B $(OUTPUT_DIR)/wasm-micro-runtime \
-		-DWAMR_BUILD_TARGET=$(shell CC=$(CC) $(BUILDROOT)/tools/guess_wamr_build_target.sh) \
+		-DWAMR_BUILD_TARGET=$(shell CC=$(CC) $(TOOLS_DIR)/guess_wamr_build_target.sh) \
 		-DWAMR_BUILD_INTERP=1 \
         -DWAMR_BUILD_FAST_INTERP=1 \
         -DWAMR_BUILD_JIT=0 \
