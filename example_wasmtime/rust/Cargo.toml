@@ -1,0 +1,9 @@
+[package]
+name = "test_wasmtime_rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0.75"
+wasmtime = "13.0.0"
+wasmtime-wasi = "13.0.0"
