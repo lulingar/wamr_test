@@ -1,22 +1,30 @@
 BUILDROOT ?= .
 OUTPUT_DIR ?= $(BUILDROOT)/build
 DIST_DIR ?= $(BUILDROOT)/../../dist
-PROGRAM = $(DIST_DIR)/test_wasmtime_c
+PROGRAM = $(DIST_DIR)/test_wasmtime_c_$(VARIANT)
 WASM_MODULE = $(DIST_DIR)/wasm_helloworld
 
-all: compile
+# default rule
+help:
+	@echo "To build: Run 'make threaded' or 'make no_thread'"
+	@echo "To execute: Run 'make run_threaded' or 'make run_no_thread'"
+	@echo "To debug: Run 'make gdb_threaded' or 'make gdb_no_thread'"
 .PHONY: all
+
+threaded:
+	$(MAKE) VARIANT=$@ depend compile
+.PHONY: threaded
+
+no_thread:
+	$(MAKE) VARIANT=$@ depend compile
+.PHONY: no_thread
 
 compile: $(PROGRAM)
 .PHONY: compile
 
-run: compile $(WASM_MODULE)
-	$(PROGRAM) $(WASM_MODULE)
-.PHONY: run
-
 CC ?= clang
 
-CSRCS += main.c
+CSRCS += main_$(VARIANT).c
 OBJS = $(addprefix $(OUTPUT_DIR)/, $(CSRCS:%.c=%.o))
 
 # dependencies
@@ -36,3 +44,29 @@ $(WASM_MODULE):
 clean:
 	rm -r $(OUTPUT_DIR)
 .PHONY: clean
+
+#### Run targets ####
+
+run_threaded:
+	@$(MAKE) VARIANT=threaded _run
+.PHONY: run_threaded
+
+gdb_threaded:
+	@$(MAKE) VARIANT=threaded _gdb
+.PHONY: gdb_threaded
+
+run_no_thread:
+	@$(MAKE) VARIANT=no_thread _run
+.PHONY: run_no_thread
+
+gdb_no_thread:
+	@$(MAKE) VARIANT=no_thread _gdb
+.PHONY: gdb_no_thread
+
+_run: $(PROGRAM) $(WASM_MODULE)
+	$(PROGRAM) $(WASM_MODULE)
+.PHONY: _run
+
+_gdb: $(PROGRAM) $(WASM_MODULE)
+	gdb -ex "run $(WASM_MODULE)" $(PROGRAM)
+.PHONY: _gdb
